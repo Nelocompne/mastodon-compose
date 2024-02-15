@@ -1,0 +1,22 @@
+version: '3'
+services:
+  postgresql:
+    restart: always
+    image: postgres:14-alpine
+    shm_size: 256mb
+    # 可视化连接使用
+    ports:
+      - 54322:5432
+    networks:
+      - mastodon_networks
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+    volumes:
+      - ./postgres14:/var/lib/postgresql/data
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      # 设置个密码 可视化工具连接使用
+      POSTGRESQL_PASSWORD: bitnami1
+networks:
+  mastodon_networks:
+    external: true

@@ -1,0 +1,18 @@
+version: "3"
+services:
+
+  minio-client:
+    image: minio/mc:RELEASE.2022-01-07T06-01-38Z
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host rm local;
+      /usr/bin/mc config host add --quiet --api s3v4 local http://minio umf3V1C3Hu5TzCDDqIXFbDDviYGhV627 OqIwA1GJADWgCf5yvlRTKTJ6bTYAhaO9exqX5lo3GlOlLfVcIbn4v2CsuamB;
+      /usr/bin/mc mb --quiet local/mastodon/;
+      /usr/bin/mc policy set public local/mastodon;
+      "      
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true

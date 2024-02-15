@@ -1,0 +1,15 @@
+version: '3'
+services:
+  redis:
+    restart: always
+    image: redis:7-alpine
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+    volumes:
+      - ./redis:/data
+    networks:
+      - mastodon_networks
+networks:
+  mastodon_networks:
+    external: true
+

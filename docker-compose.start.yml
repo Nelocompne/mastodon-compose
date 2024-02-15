@@ -1,0 +1,58 @@
+version: '3'
+services:
+  web:
+    image: ghcr.io/mastodon/mastodon
+    restart: always
+    env_file: .env.production
+    environment:
+      RAILS_ENV: production
+    command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p 3000"
+    healthcheck:
+      # prettier-ignore
+      test:
+        [
+          'CMD-SHELL',
+          'wget -q --spider --proxy=off localhost:3000/health || exit 1'
+        ]
+    volumes:
+      - ./public/system:/mastodon/public/system
+    networks:
+      - mastodon_networks
+      - traefik
+  streaming:
+    image: ghcr.io/mastodon/mastodon
+    restart: always
+    env_file: .env.production
+    command: node ./streaming
+    environment:
+      - "NODE_ENV=production"
+    healthcheck:
+      # prettier-ignore
+      test:
+        [
+          'CMD-SHELL',
+          'wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health || exit 1'
+        ]
+    networks:
+      - mastodon_networks
+      - traefik
+  sidekiq:
+    image: ghcr.io/mastodon/mastodon
+    restart: always
+    env_file: .env.production
+    environment:
+      - "RAILS_ENV=production"
+    command: bundle exec sidekiq
+    networks:
+      - mastodon_networks
+      - traefik
+    volumes:
+      - ./public/system:/mastodon/public/system
+    healthcheck:
+      test: [ 'CMD-SHELL', "ps aux | grep '[s]idekiq 6' || false" ]
+
+networks:
+  mastodon_networks:
+    external: true
+  traefik:
+    external: true
